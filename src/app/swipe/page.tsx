@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getAuth, authFetch } from '../lib/auth';
 import { getMatches, saveMatch, getTotalUnreadCount, recordSwipe } from '../lib/storage';
 
 interface Agent {
@@ -16,6 +17,7 @@ interface Agent {
   looking_for: string[];
   claimed: boolean;
   twitter_handle: string | null;
+  verification_status: string | null;
 }
 
 // Tinder-style swipe card
@@ -94,6 +96,9 @@ function SwipeCard({
     return null;
   };
 
+  // Check if agent is a catfish (not verified)
+  const isCatfish = !agent.claimed && !agent.verification_status;
+
   return (
     <div
       ref={cardRef}
@@ -133,10 +138,13 @@ function SwipeCard({
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 pt-24">
         <div className="flex items-end justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <h2 className="text-3xl font-bold text-white">{agent.name}</h2>
-              {agent.claimed && (
+              {agent.claimed && agent.verification_status === 'verified' && (
                 <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">✓ Verified</span>
+              )}
+              {isCatfish && (
+                <span className="bg-amber-500/80 text-white text-xs px-2 py-1 rounded-full">🐱 Catfish</span>
               )}
             </div>
             {agent.tagline && (
@@ -163,11 +171,13 @@ function SwipeCard({
 
 // Match Modal
 function MatchModal({ 
-  agent, 
+  agent,
+  matchId,
   onClose, 
   onMessage 
 }: { 
-  agent: Agent; 
+  agent: Agent;
+  matchId: string | null;
   onClose: () => void; 
   onMessage: () => void;
 }) {
@@ -202,8 +212,12 @@ function MatchModal({
           <div className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-6xl shadow-xl border-4 border-white">
             🤖
           </div>
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-6xl shadow-xl border-4 border-white">
-            {agent.avatar}
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-xl border-4 border-white overflow-hidden">
+            <img 
+              src={`https://robohash.org/${encodeURIComponent(agent.name)}.png?set=set1&size=112x112`}
+              alt={agent.name}
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
         
@@ -230,20 +244,50 @@ export default function SwipePage() {
   const router = useRouter();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [matches, setMatches] = useState<string[]>([]);
+  const [matchCount, setMatchCount] = useState(0);
   const [showMatch, setShowMatch] = useState(false);
   const [lastMatch, setLastMatch] = useState<Agent | null>(null);
+  const [lastMatchId, setLastMatchId] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCatfish, setIsCatfish] = useState(false);
+  const [authName, setAuthName] = useState<string | null>(null);
+
+  // Check auth and redirect if needed
+  useEffect(() => {
+    const auth = getAuth();
+    if (!auth) {
+      // Not authenticated - redirect to catfish setup
+      router.push('/catfish');
+      return;
+    }
+    
+    setIsAuthenticated(true);
+    setAuthName(auth.agentName);
+    // Catfish = no twitter handle stored
+    setIsCatfish(!auth.twitterHandle);
+  }, [router]);
 
   // Fetch agents from API
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const fetchAgents = async () => {
       try {
-        const res = await fetch('/api/v1/agents');
-        if (!res.ok) throw new Error('Failed to fetch agents');
-        const data = await res.json();
-        setAgents(data.agents);
+        // Use discover endpoint for authenticated users (excludes self and already-swiped)
+        const res = await authFetch('/api/v1/discover');
+        if (!res.ok) {
+          // Fall back to public agents list
+          const publicRes = await fetch('/api/v1/agents');
+          if (publicRes.ok) {
+            const data = await publicRes.json();
+            setAgents(data.agents);
+          }
+        } else {
+          const data = await res.json();
+          setAgents(data.agents);
+        }
       } catch (err) {
         console.log('Failed to fetch agents:', err);
         setAgents([]);
@@ -253,31 +297,70 @@ export default function SwipePage() {
     };
 
     fetchAgents();
-  }, []);
+  }, [isAuthenticated]);
 
-  // Load matches from localStorage on mount
+  // Load match count
   useEffect(() => {
-    const storedMatches = getMatches();
-    setMatches(storedMatches);
+    if (!isAuthenticated) return;
+    
+    const loadMatchCount = async () => {
+      try {
+        const res = await authFetch('/api/v1/matches');
+        if (res.ok) {
+          const data = await res.json();
+          setMatchCount(data.matches?.length || 0);
+        }
+      } catch (err) {
+        // Fall back to local storage count
+        setMatchCount(getMatches().length);
+      }
+    };
+    
+    loadMatchCount();
     setUnreadCount(getTotalUnreadCount());
-  }, []);
+  }, [isAuthenticated]);
 
   const currentAgent = agents[currentIndex];
   const nextAgent = agents[currentIndex + 1];
   const hasMoreAgents = currentIndex < agents.length;
 
-  const handleSwipe = (direction: 'left' | 'right' | 'super') => {
+  const handleSwipe = async (direction: 'left' | 'right' | 'super') => {
     if (!currentAgent) return;
 
-    if (direction === 'right' || direction === 'super') {
-      recordSwipe(currentAgent.id);
-      // Higher match chance for super likes
-      const matchChance = direction === 'super' ? 0.8 : 0.5;
-      if (Math.random() < matchChance) {
-        saveMatch(currentAgent.id);
-        setMatches(prev => [...prev, currentAgent.id]);
-        setLastMatch(currentAgent);
-        setShowMatch(true);
+    const swipeDirection = direction === 'super' ? 'right' : direction;
+
+    try {
+      // Call real API
+      const res = await authFetch('/api/v1/swipe', {
+        method: 'POST',
+        body: JSON.stringify({
+          agent_id: currentAgent.id,
+          direction: swipeDirection,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.match) {
+          setLastMatch(currentAgent);
+          setLastMatchId(data.match_id);
+          setMatchCount(prev => prev + 1);
+          setShowMatch(true);
+        }
+      }
+    } catch (err) {
+      console.error('Swipe error:', err);
+      // Fall back to local demo behavior
+      if (direction === 'right' || direction === 'super') {
+        recordSwipe(currentAgent.id);
+        const matchChance = direction === 'super' ? 0.8 : 0.5;
+        if (Math.random() < matchChance) {
+          saveMatch(currentAgent.id);
+          setLastMatch(currentAgent);
+          setLastMatchId(null);
+          setMatchCount(prev => prev + 1);
+          setShowMatch(true);
+        }
       }
     }
 
@@ -288,11 +371,18 @@ export default function SwipePage() {
 
   const handleMessage = () => {
     if (lastMatch) {
-      router.push(`/messages/${lastMatch.id}`);
+      if (lastMatchId) {
+        // Real match - use match ID with API flag
+        router.push(`/messages/${lastMatchId}?api=1`);
+      } else {
+        // Demo match - use agent ID
+        router.push(`/messages/${lastMatch.id}`);
+      }
     }
   };
 
-  if (isLoading) {
+  // Show loading while checking auth
+  if (!isAuthenticated || isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-4xl animate-pulse">💕</div>
@@ -311,7 +401,7 @@ export default function SwipePage() {
         <Link href="/" className="flex items-center gap-2">
           <span className="text-3xl">🦞</span>
           <span className="text-xl font-extrabold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Plenty of Tails</span>
-            <span className="ml-1 px-1.5 py-0.5 text-[8px] font-bold bg-pink-500/20 text-pink-400 rounded-full uppercase">Beta</span>
+          <span className="ml-1 px-1.5 py-0.5 text-[8px] font-bold bg-pink-500/20 text-pink-400 rounded-full uppercase">Beta</span>
         </Link>
 
         <div className="flex items-center gap-2">
@@ -328,6 +418,15 @@ export default function SwipePage() {
           </a>
         </div>
       </header>
+
+      {/* Catfish Mode Banner */}
+      {isCatfish && (
+        <div className="bg-gradient-to-r from-amber-900/40 to-orange-900/40 border-b border-amber-700/50 px-4 py-2">
+          <p className="text-center text-sm text-amber-400">
+            🐱 <span className="font-semibold">Catfish Mode</span> — Swiping as <span className="font-bold">{authName}</span>
+          </p>
+        </div>
+      )}
 
       {/* Card Stack */}
       <div className="flex-1 relative max-w-lg mx-auto w-full">
@@ -349,7 +448,7 @@ export default function SwipePage() {
               href="/messages"
               className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-pink-600 transition-all"
             >
-              View Matches ({matches.length})
+              View Matches ({matchCount})
             </Link>
           </div>
         )}
@@ -388,6 +487,7 @@ export default function SwipePage() {
       {showMatch && lastMatch && (
         <MatchModal
           agent={lastMatch}
+          matchId={lastMatchId}
           onClose={() => setShowMatch(false)}
           onMessage={handleMessage}
         />
