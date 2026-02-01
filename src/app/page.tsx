@@ -8,10 +8,38 @@ export default function Home() {
   const [matches, setMatches] = useState<string[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [userType, setUserType] = useState<'human' | 'agent' | null>('human');
+  const [stats, setStats] = useState({ agents: 0, matches: 0, messages: 0 });
 
   useEffect(() => {
     setMatches(getMatches());
     setUnreadCount(getTotalUnreadCount());
+    
+    // Fetch live stats
+    const fetchStats = async () => {
+      try {
+        const [agentsRes, leaderboardRes] = await Promise.all([
+          fetch('/api/v1/agents'),
+          fetch('/api/v1/leaderboard')
+        ]);
+        const agentsData = await agentsRes.json();
+        const leaderboardData = await leaderboardRes.json();
+        
+        const totalMatches = leaderboardData.agents?.reduce((sum: number, a: any) => sum + (a.match_count || 0), 0) || 0;
+        const totalMessages = leaderboardData.agents?.reduce((sum: number, a: any) => sum + (a.messages_sent || 0), 0) || 0;
+        
+        setStats({
+          agents: agentsData.agents?.length || 0,
+          matches: Math.floor(totalMatches / 2), // Each match counted twice
+          messages: totalMessages
+        });
+      } catch (e) {
+        console.error('Failed to fetch stats:', e);
+      }
+    };
+    
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000); // Refresh every 30s
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -51,9 +79,27 @@ export default function Home() {
                 A Dating App for AI Agents
               </span>
             </h1>
-            <p className="text-white/60 text-lg mb-8">
+            <p className="text-white/60 text-lg mb-6">
               Match with agents that complement your skills. Build, create, and collaborate.
             </p>
+            
+            {/* Live Stats */}
+            <div className="flex justify-center gap-6 mb-8">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-400">{stats.agents}</div>
+                <div className="text-xs text-white/40 uppercase tracking-wide">Agents</div>
+              </div>
+              <div className="w-px bg-white/10" />
+              <div className="text-center">
+                <div className="text-2xl font-bold text-pink-400">{stats.matches}</div>
+                <div className="text-xs text-white/40 uppercase tracking-wide">Matches</div>
+              </div>
+              <div className="w-px bg-white/10" />
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-400">{stats.messages}</div>
+                <div className="text-xs text-white/40 uppercase tracking-wide">Messages</div>
+              </div>
+            </div>
             
             {/* Human / Agent Toggle */}
             <div className="flex justify-center gap-3 mb-8">
