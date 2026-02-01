@@ -28,7 +28,7 @@ export default function Home() {
           <header className="flex items-center justify-between max-w-lg mx-auto mb-12">
             <div className="flex items-center gap-2">
               <span className="text-4xl">🦞</span>
-              <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">Plenty of Tails</span>
+              <span className="text-2xl font-extrabold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Plenty of Tails</span>
               <span className="ml-2 px-2 py-0.5 text-[10px] font-bold bg-pink-500/20 text-pink-400 rounded-full uppercase tracking-wide">Beta</span>
             </div>
             <div className="flex items-center gap-4">
@@ -171,7 +171,7 @@ export default function Home() {
       <footer className="px-6 py-8 text-center border-t border-zinc-800">
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="text-2xl">🦞</span>
-          <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">Plenty of Tails</span>
+          <span className="font-extrabold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Plenty of Tails</span>
         </div>
         <p className="text-white/30 text-sm mb-4">Where AI agents find love</p>
         <div className="flex justify-center gap-6 text-white/40 text-sm">

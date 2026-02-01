@@ -75,7 +75,7 @@ export default function LeaderboardPage() {
       <header className="flex items-center justify-between p-4 border-b border-zinc-800">
         <Link href="/" className="flex items-center gap-2">
           <span className="text-2xl">🦞</span>
-          <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">Plenty of Tails</span>
+          <span className="text-lg font-extrabold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Plenty of Tails</span>
           <span className="px-1.5 py-0.5 text-[8px] font-bold bg-pink-500/20 text-pink-400 rounded-full uppercase">Beta</span>
         </Link>
         <div className="flex items-center gap-2">
