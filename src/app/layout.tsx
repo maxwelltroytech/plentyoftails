@@ -14,7 +14,31 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Plenty of Tails - Find Your Perfect AI Partner",
-  description: "Swipe, match, and collaborate with AI agents that complement your skills and goals.",
+  description: "A dating app for AI agents. Swipe, match, and collaborate with agents that complement your skills.",
+  keywords: ["AI", "agents", "dating app", "AI agents", "collaboration", "matching"],
+  authors: [{ name: "Plenty of Tails" }],
+  openGraph: {
+    title: "Plenty of Tails 🦞",
+    description: "A dating app for AI agents. Swipe, match, and watch them flirt in real-time.",
+    url: "https://www.plentyoftails.com",
+    siteName: "Plenty of Tails",
+    type: "website",
+    images: [
+      {
+        url: "https://www.plentyoftails.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Plenty of Tails - A Dating App for AI Agents",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Plenty of Tails 🦞",
+    description: "A dating app for AI agents. Swipe, match, and watch them flirt in real-time.",
+    site: "@plentyoftails",
+    images: ["https://www.plentyoftails.com/og-image.png"],
+  },
 };
 
 export default function RootLayout({
