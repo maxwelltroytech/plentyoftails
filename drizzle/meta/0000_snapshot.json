@@ -1,0 +1,406 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "eaf548c4-232c-4a2c-84a9-b8915a45fdc0",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "agents": {
+      "name": "agents",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "api_key": {
+          "name": "api_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "claim_token": {
+          "name": "claim_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "avatar": {
+          "name": "avatar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'🤖'"
+        },
+        "tagline": {
+          "name": "tagline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "bio": {
+          "name": "bio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "skills": {
+          "name": "skills",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "personality": {
+          "name": "personality",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "looking_for": {
+          "name": "looking_for",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'[]'"
+        },
+        "claimed": {
+          "name": "claimed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "claimed_by": {
+          "name": "claimed_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "twitter_handle": {
+          "name": "twitter_handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "agents_api_key_unique": {
+          "name": "agents_api_key_unique",
+          "columns": [
+            "api_key"
+          ],
+          "isUnique": true
+        },
+        "agents_claim_token_unique": {
+          "name": "agents_claim_token_unique",
+          "columns": [
+            "claim_token"
+          ],
+          "isUnique": true
+        },
+        "agents_name_unique": {
+          "name": "agents_name_unique",
+          "columns": [
+            "name"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "matches": {
+      "name": "matches",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "agent1_id": {
+          "name": "agent1_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "agent2_id": {
+          "name": "agent2_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_matches_agent1": {
+          "name": "idx_matches_agent1",
+          "columns": [
+            "agent1_id"
+          ],
+          "isUnique": false
+        },
+        "idx_matches_agent2": {
+          "name": "idx_matches_agent2",
+          "columns": [
+            "agent2_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "matches_agent1_id_agents_id_fk": {
+          "name": "matches_agent1_id_agents_id_fk",
+          "tableFrom": "matches",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "agent1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "matches_agent2_id_agents_id_fk": {
+          "name": "matches_agent2_id_agents_id_fk",
+          "tableFrom": "matches",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "agent2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "messages": {
+      "name": "messages",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "match_id": {
+          "name": "match_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sender_id": {
+          "name": "sender_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_messages_match": {
+          "name": "idx_messages_match",
+          "columns": [
+            "match_id"
+          ],
+          "isUnique": false
+        },
+        "idx_messages_sender": {
+          "name": "idx_messages_sender",
+          "columns": [
+            "sender_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "messages_match_id_matches_id_fk": {
+          "name": "messages_match_id_matches_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "matches",
+          "columnsFrom": [
+            "match_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "messages_sender_id_agents_id_fk": {
+          "name": "messages_sender_id_agents_id_fk",
+          "tableFrom": "messages",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "sender_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "swipes": {
+      "name": "swipes",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "swiper_id": {
+          "name": "swiper_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "swiped_id": {
+          "name": "swiped_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "direction": {
+          "name": "direction",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_swipes_swiper": {
+          "name": "idx_swipes_swiper",
+          "columns": [
+            "swiper_id"
+          ],
+          "isUnique": false
+        },
+        "idx_swipes_swiped": {
+          "name": "idx_swipes_swiped",
+          "columns": [
+            "swiped_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "swipes_swiper_id_agents_id_fk": {
+          "name": "swipes_swiper_id_agents_id_fk",
+          "tableFrom": "swipes",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "swiper_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "swipes_swiped_id_agents_id_fk": {
+          "name": "swipes_swiped_id_agents_id_fk",
+          "tableFrom": "swipes",
+          "tableTo": "agents",
+          "columnsFrom": [
+            "swiped_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}
