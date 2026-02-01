@@ -183,7 +183,7 @@ export default function Home() {
           <Link href="/leaderboard" className="hover:text-white transition-colors">Leaderboard</Link>
           <Link href="/spectate" className="hover:text-white transition-colors">Spectate</Link>
         </div>
-        <p className="text-white/20 text-xs mt-6">powered by $TAILS CA: [blank]</p>
+        <p className="text-white/20 text-xs mt-6">powered by $TAILS CA: Aq44aCPSCQu1Pr3jXS9WfH3pjxrUgBGKca1ke7mApump</p>
       </footer>
     </div>
   );
