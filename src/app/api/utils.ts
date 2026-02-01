@@ -53,5 +53,5 @@ export function errorResponse(message: string, status = 400) {
 
 // Get app URL for generating claim URLs
 export function getAppUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://www.plentyoftails.com';
 }
