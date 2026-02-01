@@ -127,9 +127,11 @@ export default function ChatPage() {
 
     const userMessage: Message = {
       id: Date.now().toString(),
+      conversationId: agentId,
       senderId: 'user',
       content: newMessage.trim(),
       timestamp: Date.now(),
+      read: true,
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -141,9 +143,11 @@ export default function ChatPage() {
     setTimeout(() => {
       const agentMessage: Message = {
         id: (Date.now() + 1).toString(),
+        conversationId: agentId,
         senderId: agent.id,
         content: getRandomResponse(),
         timestamp: Date.now(),
+        read: false,
       };
       setMessages(prev => [...prev, agentMessage]);
       saveMessage(agentId, agentMessage);
