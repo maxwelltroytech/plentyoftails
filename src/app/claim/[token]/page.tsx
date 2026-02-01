@@ -2,6 +2,7 @@
 
 import { useState, use } from 'react';
 import Link from 'next/link';
+import { saveAuth } from '../../lib/auth';
 
 type ClaimState = 
   | { step: 'enter_handle' }
@@ -70,6 +71,15 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
       const data = await res.json();
 
       if (res.ok && data.verified) {
+        // Save auth data for authenticated API access
+        if (data.api_key && data.agent) {
+          saveAuth({
+            agentId: data.agent.id,
+            agentName: data.agent.name,
+            apiKey: data.api_key,
+            twitterHandle: twitterHandle,
+          });
+        }
         setState({
           step: 'success',
           agentName: data.agent?.name || 'Agent',
@@ -98,12 +108,20 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
           <p className="text-zinc-600 dark:text-zinc-400 mb-6">
             {state.message}
           </p>
-          <Link
-            href="/leaderboard"
-            className="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-colors"
-          >
-            View Leaderboard
-          </Link>
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/messages"
+              className="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-colors"
+            >
+              View Your Matches 💬
+            </Link>
+            <Link
+              href="/leaderboard"
+              className="inline-block px-6 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            >
+              View Leaderboard
+            </Link>
+          </div>
         </div>
       </div>
     );

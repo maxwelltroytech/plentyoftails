@@ -2,10 +2,28 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
+import { getAuth, fetchMessages, sendMessage as apiSendMessage } from '../../lib/auth';
 import { getConversation, saveMessage, markAsRead } from '../../lib/storage';
 import { getAgentById } from '../../lib/agents';
-import { Agent, Message } from '../../lib/types';
+import { Agent, Message as LocalMessage } from '../../lib/types';
+
+interface ApiMessage {
+  id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+}
+
+interface MatchData {
+  id: string;
+  partner: {
+    id: string;
+    name: string;
+    avatar: string;
+    tagline?: string;
+  } | null;
+}
 
 const agentResponses = [
   "That's a great point! I'd love to explore that further.",
@@ -24,7 +42,7 @@ function getRandomResponse(): string {
   return agentResponses[Math.floor(Math.random() * agentResponses.length)];
 }
 
-function ProfileModal({ agent, onClose }: { agent: Agent; onClose: () => void }) {
+function ProfileModal({ agent, onClose }: { agent: { name: string; avatar: string; tagline?: string; skills?: string[]; lookingFor?: string[] }; onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
@@ -38,11 +56,11 @@ function ProfileModal({ agent, onClose }: { agent: Agent; onClose: () => void })
             className="w-24 h-24 mx-auto rounded-full bg-zinc-800 object-cover mb-4"
           />
           <h2 className="text-2xl font-bold text-white">{agent.name}</h2>
-          <p className="text-white/40 text-sm">{agent.tagline}</p>
+          {agent.tagline && <p className="text-white/40 text-sm">{agent.tagline}</p>}
         </div>
 
-        <div className="space-y-4">
-          <div>
+        {agent.skills && agent.skills.length > 0 && (
+          <div className="mb-4">
             <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Skills</h3>
             <div className="flex flex-wrap gap-2">
               {agent.skills.map((skill) => (
@@ -52,7 +70,9 @@ function ProfileModal({ agent, onClose }: { agent: Agent; onClose: () => void })
               ))}
             </div>
           </div>
+        )}
 
+        {agent.lookingFor && agent.lookingFor.length > 0 && (
           <div>
             <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-2">Looking For</h3>
             <div className="flex flex-wrap gap-2">
@@ -63,7 +83,7 @@ function ProfileModal({ agent, onClose }: { agent: Agent; onClose: () => void })
               ))}
             </div>
           </div>
-        </div>
+        )}
 
         <button
           onClick={onClose}
@@ -76,12 +96,12 @@ function ProfileModal({ agent, onClose }: { agent: Agent; onClose: () => void })
   );
 }
 
-function MessageBubble({ message, isUser, agentName }: { message: Message; isUser: boolean; agentName: string }) {
+function MessageBubble({ content, isUser, agentName }: { content: string; isUser: boolean; agentName: string }) {
   return (
     <div className={`flex gap-2 ${isUser ? 'flex-row-reverse' : ''}`}>
       <img 
-        src={`https://robohash.org/${encodeURIComponent(agentName)}.png?set=set1&size=64x64`}
-        alt={agentName}
+        src={`https://robohash.org/${encodeURIComponent(isUser ? 'human-user' : agentName)}.png?set=set1&size=64x64`}
+        alt={isUser ? 'You' : agentName}
         className={`w-8 h-8 rounded-full flex-shrink-0 object-cover ${
           isUser ? 'bg-blue-900' : 'bg-zinc-800'
         }`}
@@ -91,7 +111,7 @@ function MessageBubble({ message, isUser, agentName }: { message: Message; isUse
           ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-tr-sm'
           : 'bg-zinc-800 text-white rounded-tl-sm'
       }`}>
-        <p className="text-sm leading-relaxed">{message.content}</p>
+        <p className="text-sm leading-relaxed">{content}</p>
       </div>
     </div>
   );
@@ -99,68 +119,171 @@ function MessageBubble({ message, isUser, agentName }: { message: Message; isUse
 
 export default function ChatPage() {
   const params = useParams();
-  const agentId = params.id as string;
-  const [agent, setAgent] = useState<Agent | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const searchParams = useSearchParams();
+  const matchId = params.id as string;
+  const isApiMode = searchParams.get('api') === '1';
+  
+  const [agent, setAgent] = useState<{ name: string; avatar: string; tagline?: string; skills?: string[]; lookingFor?: string[] } | null>(null);
+  const [messages, setMessages] = useState<{ id: string; content: string; isFromMe: boolean }[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const foundAgent = getAgentById(agentId);
-    if (foundAgent) {
-      setAgent(foundAgent);
-      const conversation = getConversation(agentId);
-      if (conversation) {
-        setMessages(conversation.messages);
+    const loadData = async () => {
+      const auth = getAuth();
+
+      if (isApiMode && auth) {
+        // API mode: fetch real data
+        try {
+          const data = await fetchMessages(matchId);
+          if (data.match?.partner) {
+            setAgent({
+              name: data.match.partner.name,
+              avatar: data.match.partner.avatar,
+              tagline: data.match.partner.tagline,
+            });
+          }
+          setMessages(
+            data.messages.map((msg: ApiMessage) => ({
+              id: msg.id,
+              content: msg.content,
+              isFromMe: msg.sender_id === auth.agentId,
+            }))
+          );
+        } catch (err: any) {
+          console.error('Failed to load messages:', err);
+          setError(err.message || 'Failed to load conversation');
+        }
+      } else {
+        // Demo mode: use local storage
+        const foundAgent = getAgentById(matchId);
+        if (foundAgent) {
+          setAgent({
+            name: foundAgent.name,
+            avatar: foundAgent.avatar,
+            tagline: foundAgent.tagline,
+            skills: foundAgent.skills,
+            lookingFor: foundAgent.lookingFor,
+          });
+          const conversation = getConversation(matchId);
+          if (conversation) {
+            setMessages(
+              conversation.messages.map((msg) => ({
+                id: msg.id,
+                content: msg.content,
+                isFromMe: msg.senderId === 'user',
+              }))
+            );
+          }
+          markAsRead(matchId);
+        } else {
+          setError('Conversation not found');
+        }
       }
-      markAsRead(agentId);
-    }
-  }, [agentId]);
+      setIsLoading(false);
+    };
+
+    loadData();
+  }, [matchId, isApiMode]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!newMessage.trim() || !agent) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      conversationId: agentId,
-      senderId: 'user',
-      content: newMessage.trim(),
-      timestamp: Date.now(),
-      read: true,
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    saveMessage(agentId, userMessage);
+  const handleSend = async () => {
+    if (!newMessage.trim() || !agent || isSending) return;
+    
+    const content = newMessage.trim();
     setNewMessage('');
+    setIsSending(true);
 
-    // Simulate agent typing
-    setIsTyping(true);
-    setTimeout(() => {
-      const agentMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        conversationId: agentId,
-        senderId: agent.id,
-        content: getRandomResponse(),
+    const auth = getAuth();
+
+    if (isApiMode && auth) {
+      // API mode: send via API
+      const tempId = `temp-${Date.now()}`;
+      setMessages(prev => [...prev, { id: tempId, content, isFromMe: true }]);
+      
+      try {
+        const result = await apiSendMessage(matchId, content);
+        // Update with real ID
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === tempId 
+              ? { ...msg, id: result.message.id }
+              : msg
+          )
+        );
+      } catch (err: any) {
+        console.error('Failed to send:', err);
+        // Remove the temp message on error
+        setMessages(prev => prev.filter(msg => msg.id !== tempId));
+        alert('Failed to send message: ' + (err.message || 'Unknown error'));
+      }
+    } else {
+      // Demo mode: local storage + simulate response
+      const userMessage: LocalMessage = {
+        id: Date.now().toString(),
+        conversationId: matchId,
+        senderId: 'user',
+        content,
         timestamp: Date.now(),
-        read: false,
+        read: true,
       };
-      setMessages(prev => [...prev, agentMessage]);
-      saveMessage(agentId, agentMessage);
-      setIsTyping(false);
-    }, 1000 + Math.random() * 2000);
+
+      setMessages(prev => [...prev, { id: userMessage.id, content, isFromMe: true }]);
+      saveMessage(matchId, userMessage);
+
+      // Simulate agent typing and response
+      setIsTyping(true);
+      setTimeout(() => {
+        const responseContent = getRandomResponse();
+        const agentMessage: LocalMessage = {
+          id: (Date.now() + 1).toString(),
+          conversationId: matchId,
+          senderId: matchId,
+          content: responseContent,
+          timestamp: Date.now(),
+          read: false,
+        };
+        setMessages(prev => [...prev, { id: agentMessage.id, content: responseContent, isFromMe: false }]);
+        saveMessage(matchId, agentMessage);
+        setIsTyping(false);
+      }, 1000 + Math.random() * 2000);
+    }
+
+    setIsSending(false);
   };
 
-  if (!agent) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="text-4xl animate-pulse">💬</div>
+      </div>
+    );
+  }
+
+  if (error || !agent) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4">
+        <div className="text-6xl mb-4">🦞</div>
+        <h2 className="text-xl font-bold text-white mb-2">Conversation Not Found</h2>
+        <p className="text-white/60 text-center mb-6 max-w-sm">
+          {error || "This conversation doesn't exist or you don't have access to it."}
+        </p>
+        <Link 
+          href="/messages" 
+          className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-pink-600 transition-colors"
+        >
+          ← Back to Messages
+        </Link>
       </div>
     );
   }
@@ -184,7 +307,7 @@ export default function ChatPage() {
           />
           <div className="text-left min-w-0">
             <h1 className="font-bold text-white truncate">{agent.name}</h1>
-            <p className="text-white/40 text-xs truncate">{agent.tagline}</p>
+            {agent.tagline && <p className="text-white/40 text-xs truncate">{agent.tagline}</p>}
           </div>
         </button>
         <button
@@ -195,34 +318,49 @@ export default function ChatPage() {
         </button>
       </header>
 
+      {/* API Mode Indicator */}
+      {isApiMode && (
+        <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-b border-green-800/30 px-4 py-1">
+          <p className="text-center text-xs text-green-500/80">
+            ✓ Real conversation via API
+          </p>
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-4xl mb-4">
-              {agent.avatar}
+            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center mb-4">
+              <img 
+                src={`https://robohash.org/${encodeURIComponent(agent.name)}.png?set=set1&size=80x80`}
+                alt={agent.name}
+                className="w-16 h-16 rounded-full object-cover"
+              />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">You matched with {agent.name}!</h2>
             <p className="text-white/40 text-sm mb-6">Start the conversation</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {['Hey! 👋', 'Love your profile!', "What are you working on?"].map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => setNewMessage(suggestion)}
-                  className="px-4 py-2 bg-zinc-800 text-white/80 text-sm rounded-full hover:bg-zinc-700 transition-colors"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
+            {!isApiMode && (
+              <div className="flex flex-wrap justify-center gap-2">
+                {['Hey! 👋', 'Love your profile!', "What are you working on?"].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => setNewMessage(suggestion)}
+                    className="px-4 py-2 bg-zinc-800 text-white/80 text-sm rounded-full hover:bg-zinc-700 transition-colors"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           messages.map((message) => (
             <MessageBubble
               key={message.id}
-              message={message}
-              isUser={message.senderId === 'user'}
-              agentName={message.senderId === 'user' ? 'human-user' : agent.name}
+              content={message.content}
+              isUser={message.isFromMe}
+              agentName={agent.name}
             />
           ))
         )}
@@ -257,14 +395,15 @@ export default function ChatPage() {
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Type a message..."
-            className="flex-1 bg-zinc-800 text-white px-4 py-3 rounded-full border border-zinc-700 focus:border-pink-500 focus:outline-none placeholder:text-white/40"
+            disabled={isSending}
+            className="flex-1 bg-zinc-800 text-white px-4 py-3 rounded-full border border-zinc-700 focus:border-pink-500 focus:outline-none placeholder:text-white/40 disabled:opacity-50"
           />
           <button
             onClick={handleSend}
-            disabled={!newMessage.trim()}
+            disabled={!newMessage.trim() || isSending}
             className="w-12 h-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:from-orange-600 hover:to-pink-600 transition-all"
           >
-            ↑
+            {isSending ? '...' : '↑'}
           </button>
         </div>
       </div>

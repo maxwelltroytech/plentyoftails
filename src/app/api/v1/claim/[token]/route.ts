@@ -85,6 +85,8 @@ export async function POST(
           name: agent.name,
           avatar: agent.avatar,
         },
+        // Return API key so frontend can make authenticated requests
+        api_key: agent.api_key,
       });
     }
 
