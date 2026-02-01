@@ -32,9 +32,11 @@ function ProfileModal({ agent, onClose }: { agent: Agent; onClose: () => void })
         onClick={e => e.stopPropagation()}
       >
         <div className="text-center mb-6">
-          <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-5xl mb-4">
-            {agent.avatar}
-          </div>
+          <img 
+            src={`https://robohash.org/${encodeURIComponent(agent.name)}.png?set=set1&size=200x200`}
+            alt={agent.name}
+            className="w-24 h-24 mx-auto rounded-full bg-zinc-800 object-cover mb-4"
+          />
           <h2 className="text-2xl font-bold text-white">{agent.name}</h2>
           <p className="text-white/40 text-sm">{agent.tagline}</p>
         </div>
@@ -74,16 +76,16 @@ function ProfileModal({ agent, onClose }: { agent: Agent; onClose: () => void })
   );
 }
 
-function MessageBubble({ message, isUser, avatar }: { message: Message; isUser: boolean; avatar: string }) {
+function MessageBubble({ message, isUser, agentName }: { message: Message; isUser: boolean; agentName: string }) {
   return (
     <div className={`flex gap-2 ${isUser ? 'flex-row-reverse' : ''}`}>
-      <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-sm ${
-        isUser 
-          ? 'bg-gradient-to-br from-blue-500 to-purple-500' 
-          : 'bg-gradient-to-br from-orange-400 to-pink-500'
-      }`}>
-        {avatar}
-      </div>
+      <img 
+        src={`https://robohash.org/${encodeURIComponent(agentName)}.png?set=set1&size=64x64`}
+        alt={agentName}
+        className={`w-8 h-8 rounded-full flex-shrink-0 object-cover ${
+          isUser ? 'bg-blue-900' : 'bg-zinc-800'
+        }`}
+      />
       <div className={`max-w-[75%] px-4 py-3 rounded-2xl ${
         isUser
           ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-tr-sm'
@@ -175,9 +177,11 @@ export default function ChatPage() {
           onClick={() => setShowProfile(true)}
           className="flex items-center gap-3 flex-1 min-w-0"
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-xl">
-            {agent.avatar}
-          </div>
+          <img 
+            src={`https://robohash.org/${encodeURIComponent(agent.name)}.png?set=set1&size=80x80`}
+            alt={agent.name}
+            className="w-10 h-10 rounded-full bg-zinc-800 object-cover"
+          />
           <div className="text-left min-w-0">
             <h1 className="font-bold text-white truncate">{agent.name}</h1>
             <p className="text-white/40 text-xs truncate">{agent.tagline}</p>
@@ -218,16 +222,18 @@ export default function ChatPage() {
               key={message.id}
               message={message}
               isUser={message.senderId === 'user'}
-              avatar={message.senderId === 'user' ? '🧑' : agent.avatar}
+              agentName={message.senderId === 'user' ? 'human-user' : agent.name}
             />
           ))
         )}
 
         {isTyping && (
           <div className="flex gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-sm">
-              {agent.avatar}
-            </div>
+            <img 
+              src={`https://robohash.org/${encodeURIComponent(agent.name)}.png?set=set1&size=64x64`}
+              alt={agent.name}
+              className="w-8 h-8 rounded-full bg-zinc-800 object-cover"
+            />
             <div className="bg-zinc-800 px-4 py-3 rounded-2xl rounded-tl-sm">
               <div className="flex gap-1">
                 <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />

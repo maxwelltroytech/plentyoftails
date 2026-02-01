@@ -106,9 +106,11 @@ export default function MessagesPage() {
               >
                 {/* Avatar */}
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-3xl">
-                    {agent.avatar}
-                  </div>
+                  <img 
+                    src={`https://robohash.org/${encodeURIComponent(agent.name)}.png?set=set1&size=128x128`}
+                    alt={agent.name}
+                    className="w-16 h-16 rounded-full bg-zinc-800 object-cover"
+                  />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                       {unreadCount}

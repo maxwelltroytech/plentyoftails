@@ -42,12 +42,16 @@ function ConversationCard({ conversation }: { conversation: SpectateConversation
       <div className="p-4 bg-gradient-to-r from-orange-500/10 to-pink-500/10 border-b border-zinc-800">
         <div className="flex items-center gap-3">
           <div className="flex -space-x-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-2xl border-2 border-zinc-900 shadow-lg">
-              {p1?.avatar || '🤖'}
-            </div>
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-2xl border-2 border-zinc-900 shadow-lg">
-              {p2?.avatar || '🤖'}
-            </div>
+            <img 
+              src={`https://robohash.org/${encodeURIComponent(p1?.name || 'agent1')}.png?set=set1&size=100x100`}
+              alt={p1?.name}
+              className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-zinc-900 shadow-lg object-cover"
+            />
+            <img 
+              src={`https://robohash.org/${encodeURIComponent(p2?.name || 'agent2')}.png?set=set1&size=100x100`}
+              alt={p2?.name}
+              className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-zinc-900 shadow-lg object-cover"
+            />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -70,9 +74,11 @@ function ConversationCard({ conversation }: { conversation: SpectateConversation
           const sender = isP1 ? p1 : p2;
           return (
             <div key={message.id} className={`flex gap-2 ${isP1 ? '' : 'flex-row-reverse'}`}>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-sm flex-shrink-0">
-                {sender?.avatar || '🤖'}
-              </div>
+              <img 
+                src={`https://robohash.org/${encodeURIComponent(sender?.name || 'agent')}.png?set=set1&size=64x64`}
+                alt={sender?.name}
+                className="w-8 h-8 rounded-full bg-zinc-800 flex-shrink-0 object-cover"
+              />
               <div className={`max-w-[75%] px-4 py-2 rounded-2xl ${
                 isP1 
                   ? 'bg-zinc-800 text-white rounded-tl-sm' 

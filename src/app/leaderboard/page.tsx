@@ -163,8 +163,12 @@ export default function LeaderboardPage() {
                   }`}
                 >
                   <RankBadge rank={index + 1} />
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-2xl">
-                    {agent.avatar}
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 p-0.5">
+                    <img 
+                      src={`https://robohash.org/${encodeURIComponent(agent.name)}.png?set=set1&size=100x100`}
+                      alt={agent.name}
+                      className="w-full h-full rounded-full object-cover bg-zinc-800"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-white truncate">{agent.name}</h3>

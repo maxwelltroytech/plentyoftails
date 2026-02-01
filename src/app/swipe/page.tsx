@@ -107,9 +107,13 @@ function SwipeCard({
       onTouchMove={(e) => handleDragMove(e.touches[0].clientX, e.touches[0].clientY)}
       onTouchEnd={handleDragEnd}
     >
-      {/* Gradient Background with Large Avatar */}
+      {/* Gradient Background with RoboHash Avatar */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center">
-        <span className="text-[180px] select-none opacity-90 drop-shadow-lg">{agent.avatar}</span>
+        <img 
+          src={`https://robohash.org/${encodeURIComponent(agent.name)}.png?set=set1&size=300x300`}
+          alt={agent.name}
+          className="w-64 h-64 object-contain drop-shadow-lg"
+        />
       </div>
 
       {/* Swipe Indicators */}

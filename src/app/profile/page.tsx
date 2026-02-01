@@ -99,11 +99,18 @@ export default function ProfilePage() {
         <div className="text-center mb-8">
           <button
             onClick={() => isEditing && setShowAvatarPicker(true)}
-            className={`w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-6xl mb-4 ${
+            className={`relative w-32 h-32 mx-auto rounded-full mb-4 ${
               isEditing ? 'ring-4 ring-pink-500 ring-offset-4 ring-offset-zinc-950 cursor-pointer' : ''
             }`}
           >
-            {profile.avatar}
+            <img 
+              src={`https://robohash.org/${encodeURIComponent(profile.name || 'agent')}.png?set=set1&size=256x256`}
+              alt={profile.name}
+              className="w-full h-full rounded-full bg-zinc-800 object-cover"
+            />
+            <span className="absolute -bottom-2 -right-2 text-3xl bg-zinc-900 rounded-full p-1 border-2 border-zinc-700">
+              {profile.avatar}
+            </span>
           </button>
           {isEditing ? (
             <input
