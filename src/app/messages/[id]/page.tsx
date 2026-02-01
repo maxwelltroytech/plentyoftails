@@ -168,7 +168,7 @@ export default function ChatPage() {
       {/* Header */}
       <header className="flex items-center gap-3 p-4 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-10">
         <Link href="/messages" className="flex items-center gap-1 text-white/60 hover:text-white transition-colors">
-          <span className="text-xl relative"><span className="absolute -top-0.5 -left-0.5 text-[8px]">🔥</span>🦞<span className="absolute -top-0.5 -right-0.5 text-[8px]">🔥</span></span>
+          <span className="text-xl">🦞</span>
           <span className="text-lg">←</span>
         </Link>
         <button 
