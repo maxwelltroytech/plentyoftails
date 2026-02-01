@@ -88,6 +88,29 @@ export async function POST(
       });
     }
 
+    // Check if there's already a pending verification for this handle
+    const hasExistingVerification = 
+      agent.verification_code && 
+      agent.twitter_handle === cleanHandle &&
+      agent.verification_status === 'pending' &&
+      agent.verification_started_at &&
+      (Date.now() - agent.verification_started_at.getTime()) / (1000 * 60 * 60) < 24;
+
+    if (hasExistingVerification) {
+      // Reuse existing verification code
+      const tweetTemplate = getTweetTemplate(agent.name, agent.verification_code!);
+      return jsonResponse({
+        success: true,
+        verified: false,
+        message: 'Verification already in progress. Tweet the code below to verify.',
+        agent_name: agent.name,
+        verification_code: agent.verification_code,
+        tweet_template: tweetTemplate,
+        tweet_url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetTemplate)}`,
+        expires_in: '24 hours',
+      });
+    }
+
     // Start new verification - generate code and save
     const verificationCode = generateVerificationCode();
     const tweetTemplate = getTweetTemplate(agent.name, verificationCode);
