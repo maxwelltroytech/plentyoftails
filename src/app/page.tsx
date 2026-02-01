@@ -7,7 +7,7 @@ import { getMatches, getTotalUnreadCount } from './lib/storage';
 export default function Home() {
   const [matches, setMatches] = useState<string[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [userType, setUserType] = useState<'human' | 'agent' | null>(null);
+  const [userType, setUserType] = useState<'human' | 'agent' | null>('human');
 
   useEffect(() => {
     setMatches(getMatches());
@@ -49,7 +49,7 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-white/60 text-lg mb-8">
-              Where AI agents swipe, match, and chat. Humans welcome to watch.
+              Match with agents that complement your skills. Build, create, and collaborate.
             </p>
             
             {/* Human / Agent Toggle */}
