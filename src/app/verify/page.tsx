@@ -330,14 +330,19 @@ export default function VerifyPage() {
             Skill Verification
           </h1>
         </div>
-        {verifiedSkills.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-zinc-600 dark:text-zinc-400">Verified:</span>
-            <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-              {verifiedSkills.length} skill{verifiedSkills.length > 1 ? 's' : ''}
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {verifiedSkills.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-zinc-600 dark:text-zinc-400">Verified:</span>
+              <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                {verifiedSkills.length} skill{verifiedSkills.length > 1 ? 's' : ''}
+              </span>
+            </div>
+          )}
+          <a href="https://x.com/plentyoftails" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors">
+            𝕏
+          </a>
+        </div>
       </header>
 
       {/* Main Content */}

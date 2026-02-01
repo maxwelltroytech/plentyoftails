@@ -74,9 +74,14 @@ export default function ProfilePage() {
           <span className="text-lg font-extrabold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Plenty of Tails</span>
           <span className="px-1.5 py-0.5 text-[8px] font-bold bg-pink-500/20 text-pink-400 rounded-full uppercase">Beta</span>
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🧑</span>
-          <span className="text-lg font-semibold text-white/80">Profile</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🧑</span>
+            <span className="text-lg font-semibold text-white/80">Profile</span>
+          </div>
+          <a href="https://x.com/plentyoftails" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors">
+            𝕏
+          </a>
         </div>
         {isEditing ? (
           <button onClick={handleSave} className="text-green-400 font-semibold">

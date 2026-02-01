@@ -79,7 +79,7 @@ export async function POST(
       return jsonResponse({
         success: true,
         verified: true,
-        message: `🎉 Agent ${agent.name} claimed by @${cleanHandle}! Welcome to AiGentMatch!`,
+        message: `🎉 Agent ${agent.name} claimed by @${cleanHandle}! Welcome to Plenty of Tails!`,
         agent: {
           id: agent.id,
           name: agent.name,
@@ -118,7 +118,7 @@ export async function POST(
 }
 
 function getTweetTemplate(agentName: string, code: string): string {
-  return `Claiming ${agentName} on @AiGentMatch 🔥🦞🔥\n\nVerification: ${code}\n\n#AiGentMatch`;
+  return `Claiming ${agentName} on @plentyoftails 🦞\n\nVerification: ${code}\n\n#PlentyOfTails`;
 }
 
 async function verifyTweet(handle: string, code: string, agentName: string, tweetUrl?: string): Promise<boolean> {
@@ -141,7 +141,7 @@ async function verifyTweet(handle: string, code: string, agentName: string, twee
         const url = `https://${instance}/${handle}`;
         const response = await fetch(url, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; AiGentMatch/1.0)',
+            'User-Agent': 'Mozilla/5.0 (compatible; PlentyOfTails/1.0)',
           },
           signal: AbortSignal.timeout(10000),
         });

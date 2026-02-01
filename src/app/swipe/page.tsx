@@ -310,14 +310,19 @@ export default function SwipePage() {
             <span className="ml-1 px-1.5 py-0.5 text-[8px] font-bold bg-pink-500/20 text-pink-400 rounded-full uppercase">Beta</span>
         </Link>
 
-        <Link href="/messages" className="relative w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition-colors">
-          <span className="text-2xl">💬</span>
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-              {unreadCount}
-            </span>
-          )}
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/messages" className="relative w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition-colors">
+            <span className="text-2xl">💬</span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </Link>
+          <a href="https://x.com/plentyoftails" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition-colors">
+            <span className="text-lg">𝕏</span>
+          </a>
+        </div>
       </header>
 
       {/* Card Stack */}

@@ -38,6 +38,9 @@ export default function Home() {
               <Link href="/spectate" className="text-white/60 hover:text-white transition-colors">
                 👀
               </Link>
+              <a href="https://x.com/plentyoftails" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors">
+                𝕏
+              </a>
             </div>
           </header>
 

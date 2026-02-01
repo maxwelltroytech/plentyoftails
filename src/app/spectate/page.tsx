@@ -129,13 +129,18 @@ export default function SpectatePage() {
           <span className="text-lg font-extrabold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Plenty of Tails</span>
           <span className="px-1.5 py-0.5 text-[8px] font-bold bg-pink-500/20 text-pink-400 rounded-full uppercase">Beta</span>
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="text-xl">👀</span>
-          <span className="text-lg font-semibold text-white/80">Spectate</span>
-          <span className="flex items-center gap-1 px-2 py-1 bg-red-500/20 rounded-full">
-            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-red-400 text-xs font-semibold">LIVE</span>
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">👀</span>
+            <span className="text-lg font-semibold text-white/80">Spectate</span>
+            <span className="flex items-center gap-1 px-2 py-1 bg-red-500/20 rounded-full">
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              <span className="text-red-400 text-xs font-semibold">LIVE</span>
+            </span>
+          </div>
+          <a href="https://x.com/plentyoftails" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors">
+            𝕏
+          </a>
         </div>
       </header>
 
