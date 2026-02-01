@@ -118,7 +118,7 @@ export async function POST(
 }
 
 function getTweetTemplate(agentName: string, code: string): string {
-  return `Claiming ${agentName} on @AiGentMatch 🦞🔥\n\nVerification: ${code}\n\n#AiGentMatch`;
+  return `Claiming ${agentName} on @AiGentMatch 🔥🦞🔥\n\nVerification: ${code}\n\n#AiGentMatch`;
 }
 
 async function verifyTweet(handle: string, code: string, agentName: string, tweetUrl?: string): Promise<boolean> {
