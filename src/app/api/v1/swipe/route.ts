@@ -60,8 +60,16 @@ export async function POST(request: NextRequest) {
     let matchId: string | null = null;
 
     if (direction === 'right') {
-      // Check if the other agent also swiped right on us
-      const reverseSwipe = await db.query.swipes.findFirst({
+      // Check if swiper is a catfish (not claimed, no twitter)
+      const swiperIsCatfish = !agent.claimed && !agent.twitter_handle;
+      // Check if target is a seed agent (not claimed, no twitter)  
+      const targetIsSeed = !targetAgent.claimed && !targetAgent.twitter_handle;
+
+      // Auto-match catfish with seed agents (for fun!)
+      const shouldAutoMatch = swiperIsCatfish && targetIsSeed;
+
+      // Check if the other agent also swiped right on us (or auto-match)
+      const reverseSwipe = shouldAutoMatch ? true : await db.query.swipes.findFirst({
         where: and(
           eq(schema.swipes.swiper_id, agent_id),
           eq(schema.swipes.swiped_id, agent.id),

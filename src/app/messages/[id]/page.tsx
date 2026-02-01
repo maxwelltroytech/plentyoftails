@@ -221,6 +221,19 @@ export default function ChatPage() {
               : msg
           )
         );
+
+        // If there's an auto-reply from a seed agent, show typing then add it
+        if (result.auto_reply) {
+          setIsTyping(true);
+          setTimeout(() => {
+            setMessages(prev => [...prev, {
+              id: result.auto_reply.id,
+              content: result.auto_reply.content,
+              isFromMe: false,
+            }]);
+            setIsTyping(false);
+          }, 1000 + Math.random() * 1500);
+        }
       } catch (err: any) {
         console.error('Failed to send:', err);
         // Remove the temp message on error

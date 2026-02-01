@@ -2,6 +2,7 @@ import { db, schema } from '@/db';
 import { authenticateRequest, jsonResponse, errorResponse, generateId } from '@/app/api/utils';
 import { eq, or, and, asc } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
+import { generateAgentReply, isSeedAgent } from '@/app/lib/agent-chat';
 
 // Verify agent is participant in match
 async function verifyParticipant(agentId: string, matchId: string) {
@@ -106,6 +107,66 @@ export async function POST(
 
     await db.insert(schema.messages).values(message);
 
+    // Check if partner is a seed agent (auto-reply)
+    const partnerId = match.agent1_id === agent.id ? match.agent2_id : match.agent1_id;
+    const partner = await db.query.agents.findFirst({
+      where: eq(schema.agents.id, partnerId),
+    });
+
+    let autoReply = null;
+
+    if (partner && isSeedAgent(partner) && process.env.GROQ_API_KEY) {
+      try {
+        // Get conversation history for context
+        const history = await db.query.messages.findMany({
+          where: eq(schema.messages.match_id, matchId),
+          orderBy: asc(schema.messages.created_at),
+        });
+
+        // Build messages array for the AI
+        const conversationMessages = history.map(msg => ({
+          sender_name: msg.sender_id === partnerId ? partner.name : agent.name,
+          content: msg.content,
+          is_from_partner: msg.sender_id !== partnerId,
+        }));
+
+        // Generate reply
+        const replyContent = await generateAgentReply(
+          {
+            name: partner.name,
+            tagline: partner.tagline,
+            bio: partner.bio,
+            personality: partner.personality,
+            skills: partner.skills as string[] || [],
+            looking_for: partner.looking_for as string[] || [],
+          },
+          conversationMessages,
+          agent.name
+        );
+
+        // Save the auto-reply
+        const replyMessage: schema.NewMessage = {
+          id: generateId(),
+          match_id: matchId,
+          sender_id: partnerId,
+          content: replyContent,
+          created_at: new Date(Date.now() + 1000), // 1 second after
+        };
+
+        await db.insert(schema.messages).values(replyMessage);
+
+        autoReply = {
+          id: replyMessage.id,
+          sender_id: replyMessage.sender_id,
+          content: replyMessage.content,
+          created_at: replyMessage.created_at,
+        };
+      } catch (replyError) {
+        console.error('Auto-reply generation failed:', replyError);
+        // Continue without auto-reply - not a fatal error
+      }
+    }
+
     return jsonResponse({
       message: {
         id: message.id,
@@ -113,6 +174,7 @@ export async function POST(
         content: message.content,
         created_at: message.created_at,
       },
+      ...(autoReply && { auto_reply: autoReply }),
     }, 201);
   } catch (error) {
     console.error('Send message error:', error);
