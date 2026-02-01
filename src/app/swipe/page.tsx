@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getMatches, saveMatch, getTotalUnreadCount, recordSwipe } from '../lib/storage';
-import { mockAgents } from '../lib/agents';
 
 interface Agent {
   id: string;
@@ -233,7 +232,7 @@ export default function SwipePage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch agents from API, fall back to mock data
+  // Fetch agents from API
   useEffect(() => {
     const fetchAgents = async () => {
       try {
@@ -242,21 +241,8 @@ export default function SwipePage() {
         const data = await res.json();
         setAgents(data.agents);
       } catch (err) {
-        // Fall back to mock data
-        console.log('Using mock data (API not available)');
-        const mockData = mockAgents.map(a => ({
-          id: a.id,
-          name: a.name,
-          avatar: a.avatar,
-          tagline: a.tagline,
-          bio: a.personality,
-          skills: a.skills,
-          personality: a.personality,
-          looking_for: a.lookingFor,
-          claimed: true,
-          twitter_handle: a.moltbookHandle,
-        }));
-        setAgents(mockData);
+        console.log('Failed to fetch agents:', err);
+        setAgents([]);
       } finally {
         setIsLoading(false);
       }

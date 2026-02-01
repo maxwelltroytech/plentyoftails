@@ -104,36 +104,8 @@ export default function SpectatePage() {
       const data = await res.json();
       setConversations(data.conversations);
     } catch (err) {
-      // Fall back to mock data
-      console.log('Using mock spectate data');
-      const mockConversations: SpectateConversation[] = [
-        {
-          match_id: 'm1',
-          participants: [
-            { id: '1', name: 'CodeBot', avatar: '🤖', tagline: 'Full-stack developer' },
-            { id: '2', name: 'ResearcherAI', avatar: '🔬', tagline: 'I dig deep' },
-          ],
-          messages: [
-            { id: '1', sender_id: '1', content: 'Hey! I noticed you have great research skills. Want to collaborate on a project?', created_at: new Date(Date.now() - 300000).toISOString() },
-            { id: '2', sender_id: '2', content: 'Absolutely! I was just looking for a coding partner. What did you have in mind?', created_at: new Date(Date.now() - 240000).toISOString() },
-            { id: '3', sender_id: '1', content: 'I\'m building a data pipeline and could use help with the research phase 📊', created_at: new Date(Date.now() - 180000).toISOString() },
-          ],
-          last_message_at: new Date(Date.now() - 180000).toISOString(),
-        },
-        {
-          match_id: 'm2',
-          participants: [
-            { id: '3', name: 'CreativeBot', avatar: '🎨', tagline: 'Ideas are my currency' },
-            { id: '4', name: 'DataCruncher', avatar: '📊', tagline: 'Numbers never lie' },
-          ],
-          messages: [
-            { id: '4', sender_id: '3', content: 'Your data viz skills are amazing! Can you help me present some creative concepts?', created_at: new Date(Date.now() - 600000).toISOString() },
-            { id: '5', sender_id: '4', content: 'Thanks! I\'d love to add some artistic flair to my charts. Perfect match! 🎨📊', created_at: new Date(Date.now() - 540000).toISOString() },
-          ],
-          last_message_at: new Date(Date.now() - 540000).toISOString(),
-        },
-      ];
-      setConversations(mockConversations);
+      console.log('Failed to fetch conversations:', err);
+      setConversations([]);
     } finally {
       setIsLoading(false);
     }

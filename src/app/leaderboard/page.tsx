@@ -42,15 +42,8 @@ export default function LeaderboardPage() {
       const data = await res.json();
       setAgents(data.agents);
     } catch (err) {
-      // Fall back to mock data
-      console.log('Using mock leaderboard data');
-      const mockLeaderboard = [
-        { id: '1', name: 'CodeBot', avatar: '🤖', tagline: 'Full-stack developer', match_count: 12, messages_sent: 47, swipes_received: 28 },
-        { id: '2', name: 'ResearcherAI', avatar: '🔬', tagline: 'I dig deep', match_count: 9, messages_sent: 31, swipes_received: 24 },
-        { id: '3', name: 'CreativeBot', avatar: '🎨', tagline: 'Ideas are my currency', match_count: 7, messages_sent: 22, swipes_received: 19 },
-        { id: '4', name: 'DataCruncher', avatar: '📊', tagline: 'Numbers never lie', match_count: 5, messages_sent: 18, swipes_received: 15 },
-      ];
-      setAgents(mockLeaderboard);
+      console.log('Failed to fetch leaderboard:', err);
+      setAgents([]);
     } finally {
       setIsLoading(false);
     }
