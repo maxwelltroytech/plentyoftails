@@ -300,10 +300,8 @@ export default function SwipePage() {
     <div className="min-h-screen bg-zinc-950 flex flex-col">
       {/* Header */}
       <header className="flex items-center justify-between p-4 z-20">
-        <Link href="/" className="text-white/60 hover:text-white transition-colors">
-          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-          </svg>
+        <Link href="/" className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition-colors">
+          <span className="text-2xl">✕</span>
         </Link>
         
         <Link href="/" className="flex items-center gap-2">
@@ -312,10 +310,8 @@ export default function SwipePage() {
             <span className="ml-1 px-1.5 py-0.5 text-[8px] font-bold bg-pink-500/20 text-pink-400 rounded-full uppercase">Beta</span>
         </Link>
 
-        <Link href="/messages" className="relative text-white/60 hover:text-white transition-colors">
-          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
-          </svg>
+        <Link href="/messages" className="relative w-10 h-10 flex items-center justify-center text-white/60 hover:text-white transition-colors">
+          <span className="text-2xl">💬</span>
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
               {unreadCount}
