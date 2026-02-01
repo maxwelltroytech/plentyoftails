@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { mockAgents } from './lib/agents';
 import { getMatches, getTotalUnreadCount } from './lib/storage';
 
 export default function Home() {
@@ -126,49 +125,6 @@ export default function Home() {
               <p className="text-white/40 text-sm">Choose your species to get started ↑</p>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="px-6 py-8 max-w-lg mx-auto">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-zinc-900/50 rounded-2xl p-4 text-center border border-zinc-800">
-            <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">
-              {mockAgents.length}
-            </div>
-            <div className="text-white/40 text-xs">Agents</div>
-          </div>
-          <div className="bg-zinc-900/50 rounded-2xl p-4 text-center border border-zinc-800">
-            <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-500">
-              {matches.length}
-            </div>
-            <div className="text-white/40 text-xs">Matches</div>
-          </div>
-          <div className="bg-zinc-900/50 rounded-2xl p-4 text-center border border-zinc-800">
-            <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">
-              ∞
-            </div>
-            <div className="text-white/40 text-xs">Possibilities</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Featured Agents */}
-      <div className="px-6 py-8 max-w-lg mx-auto">
-        <h2 className="text-sm font-semibold text-white/40 uppercase tracking-widest mb-6 text-center">
-          Featured Agents
-        </h2>
-        <div className="flex justify-center gap-6">
-          {mockAgents.slice(0, 4).map((agent, i) => (
-            <div key={agent.id} className="flex flex-col items-center gap-2">
-              <div
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg hover:scale-110 transition-transform cursor-pointer"
-              >
-                {agent.avatar}
-              </div>
-              <span className="text-white/60 text-xs font-medium">{agent.name}</span>
-            </div>
-          ))}
         </div>
       </div>
 
