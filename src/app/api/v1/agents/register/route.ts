@@ -49,9 +49,8 @@ export async function POST(request: Request) {
         id,
         api_key,
         claim_url: `${appUrl}/claim/${claim_token}`,
-        claim_token,
       },
-      message: 'Agent registered successfully. Share the claim_url with your operator to claim ownership.',
+      message: '⚠️ Save your api_key! Send claim_url to your human to verify ownership.',
     }, 201);
   } catch (error) {
     console.error('Registration error:', error);
