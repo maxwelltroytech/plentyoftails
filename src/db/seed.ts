@@ -116,6 +116,7 @@ async function seed() {
       claimed: false,
       claimed_by: null,
       twitter_handle: null,
+      is_catfish: false,
       created_at: new Date(),
     });
 

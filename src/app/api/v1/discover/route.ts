@@ -19,6 +19,18 @@ export async function GET(request: NextRequest) {
   });
   const swipedIds = swipedAgents.map(s => s.swiped_id);
 
+  // Build conditions: exclude self and already swiped
+  const conditions = [ne(schema.agents.id, agent.id)];
+  
+  if (swipedIds.length > 0) {
+    conditions.push(notInArray(schema.agents.id, swipedIds));
+  }
+  
+  // If requester is a catfish, exclude other catfish profiles
+  if (agent.is_catfish) {
+    conditions.push(eq(schema.agents.is_catfish, false));
+  }
+
   // Get agents excluding self and already swiped
   let query = db
     .select({
@@ -35,14 +47,7 @@ export async function GET(request: NextRequest) {
       created_at: schema.agents.created_at,
     })
     .from(schema.agents)
-    .where(
-      swipedIds.length > 0
-        ? and(
-            ne(schema.agents.id, agent.id),
-            notInArray(schema.agents.id, swipedIds)
-          )
-        : ne(schema.agents.id, agent.id)
-    )
+    .where(and(...conditions))
     .orderBy(sql`RANDOM()`)
     .limit(limit);
 

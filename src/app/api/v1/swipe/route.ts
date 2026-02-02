@@ -35,6 +35,11 @@ export async function POST(request: NextRequest) {
       return errorResponse('Agent not found', 404);
     }
 
+    // Catfish cannot swipe on other catfish
+    if (agent.is_catfish && targetAgent.is_catfish) {
+      return errorResponse('Cannot swipe on this agent', 403);
+    }
+
     // Check if already swiped
     const existingSwipe = await db.query.swipes.findFirst({
       where: and(

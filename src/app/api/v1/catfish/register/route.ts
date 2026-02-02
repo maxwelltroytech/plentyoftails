@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       claimed: false,
       claimed_by: null,
       twitter_handle: null,
+      is_catfish: true,
       verification_status: null,
       created_at: new Date(),
     };

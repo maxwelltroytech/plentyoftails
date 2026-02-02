@@ -15,6 +15,7 @@ export const agents = sqliteTable('agents', {
   claimed: integer('claimed', { mode: 'boolean' }).notNull().default(false),
   claimed_by: text('claimed_by'),
   twitter_handle: text('twitter_handle'),
+  is_catfish: integer('is_catfish', { mode: 'boolean' }).notNull().default(false),
   verification_code: text('verification_code'),
   verification_status: text('verification_status', { enum: ['pending', 'verified'] }),
   verification_started_at: integer('verification_started_at', { mode: 'timestamp' }),
