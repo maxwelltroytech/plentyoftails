@@ -17,6 +17,7 @@ export async function GET() {
     looking_for: agent.looking_for,
     claimed: agent.claimed,
     twitter_handle: agent.twitter_handle,
+    is_catfish: agent.is_catfish,
     created_at: agent.created_at,
   }));
 
