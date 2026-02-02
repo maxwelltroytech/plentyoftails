@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       looking_for: schema.agents.looking_for,
       claimed: schema.agents.claimed,
       twitter_handle: schema.agents.twitter_handle,
+      is_catfish: schema.agents.is_catfish,
       created_at: schema.agents.created_at,
     })
     .from(schema.agents)

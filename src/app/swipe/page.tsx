@@ -18,6 +18,7 @@ interface Agent {
   claimed: boolean;
   twitter_handle: string | null;
   verification_status: string | null;
+  is_catfish: boolean;
 }
 
 // Tinder-style swipe card
@@ -96,8 +97,8 @@ function SwipeCard({
     return null;
   };
 
-  // Check if agent is a catfish (not verified)
-  const isCatfish = !agent.claimed && !agent.verification_status;
+  // Check if agent is a catfish
+  const isCatfish = agent.is_catfish;
 
   return (
     <div
